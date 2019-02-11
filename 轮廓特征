@@ -1,0 +1,35 @@
+import cv2
+
+# 读入图片
+img = cv2.imread("01.png")
+# 必须先转化成灰度图
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+# 二值化
+ret, thresh = cv2.threshold(gray, 127, 255, 0)
+# 寻找轮廓
+contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+cnt = contours[0]
+# 2.进行多边形逼近，得到多边形的角点
+# approx = cv2.approxPolyDP(cnt, 3, True)
+
+# 图像的矩可以用来计算轮廓的质心、周长和面积。
+M = cv2.moments(cnt)
+cx = int(M['m10']/M['m00'])
+cy = int(M['m01']/M['m00'])
+area = cv2.contourArea(cnt)
+perimeter = cv2.arcLength(cnt, True)
+epsilon = 0.1*cv2.arcLength(cnt, True)
+approx = cv2.approxPolyDP(cnt, epsilon, True)
+
+print('轮廓重心:%s, %s' % (cx, cy))
+print('轮廓面积:%s' % area)
+print('轮廓周长:%s' % perimeter)
+
+# 3.画出多边形
+# cv2.polylines(img, [approx], True, (0, 255, 0), 2)
+# 画出轮廓，-1,表示所有轮廓，画笔颜色为(0, 255, 0)，即Green，粗细为3
+cv2.drawContours(img, contours, -1, (0, 255, 0), 3)
+# 显示图片
+cv2.imshow("Contours", img)
+# 等待键盘输入
+cv2.waitKey(0)
